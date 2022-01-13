@@ -30,7 +30,16 @@
             <input type="submit" id="submit-button" class="btn btn-primary"/>
         </form>
     </div>
-    <div id="detail-view"></div>
+    <div id="detail-view">
+        <p>From: <span id="sender"></span></p>
+        <p>To: <span id="recipients"></span></p>
+        <p>Subject: <span id="subject"></span></p>
+        <p>Date: <span id="timestamp"></span></p>
+        <button class="btn btn-sm btn-outline-primary" id="reply">Reply</button>
+        <button class="btn btn-sm" id="archive"></button>
+        <hr>
+        <p id="email-body"></p>
+    </div>
 {% endblock %}
 
 {% block script %}

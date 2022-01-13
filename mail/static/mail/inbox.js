@@ -40,33 +40,94 @@ function compose_email() {
   };
 }
 
+function toggle_email_archived(id){
+  //Sends a request to server in order to toggle email.archive property(True or False).
+  //First get the email.archive  property value
+  fetch("emails/"+id).then(response => response.json()).then(object => {
+    console.log(object);
+    return object.archived
+  }).then(bool => {
+    fetch("emails/"+id, {
+      method: "PUT",
+      body: JSON.stringify({
+        archived: !bool //Toggle archive property
+      })
+    }).then(response => {
+      //If email.archive property is toggled successfully, toggle the appearance of archive button in DOM.
+      console.log(response)
+      if (response["status"] == "204") {
+        toggle_archive_button();
+      }
+    });
+  })
+  
+  
+}
+
+function make_button_archive(button){
+  // const button = document.querySelector("#archive");
+  button.innerHTML = "Archive";
+  button.classList.remove("btn-outline-danger");
+  button.classList.add("btn-outline-primary");
+}
+
+function make_button_unarchive(button){
+  // const button = document.querySelector("#archive");
+  button.innerHTML = "Unarchive";
+  button.classList.remove("btn-outline-primary");
+  button.classList.add("btn-outline-danger");
+}
+
+function toggle_archive_button(){
+  // Toggles the archive button between "archive" and unarchive
+  const button = document.querySelector("#archive");
+  if (button.classList.contains("btn-outline-danger")){
+    make_button_archive(button);
+    // button.innerHTML = "Archive";
+    // button.classList.remove("btn-outline-danger");
+    // button.classList.add("btn-outline-primary");
+  } else {
+    make_button_unarchive(button);
+    // button.innerHTML = "Unarchive";
+    // button.classList.remove("btn-outline-primary");
+    // button.classList.add("btn-outline-danger");
+  }
+}
+
 function load_mail(email) {
-  //Hide other views
+  //Hide email and compose views
   document.querySelector("#emails-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "none";
-  document.querySelector("#detail-view").style.display = "block";
-  document.querySelector("#detail-view").innerHTML = "";
-  let emailDiv = document.createElement("div");
-  emailDiv.className = "container bg-light border"
-  emailDiv.innerHTML = `
-  <p>From: ${email["sender"]}</p>
-  <p>To: ${email["recipients"]}</p>
-  <p>Subject: ${email["subject"]}</p>
-  <p>Date: ${email["timestamp"]}</p>
-  <p>Message: ${email["body"]}</p>
-  `;
-  document.querySelector("#detail-view").append(emailDiv);
+  // Display detail view
+  detailDiv = document.querySelector("#detail-view");
+  detailDiv.style.display = "block";
+  // Fill email data
+  document.querySelector("#sender").innerHTML = email["sender"];
+  document.querySelector("#recipients").innerHTML = email["recipients"];
+  document.querySelector("#subject").innerHTML = email["subject"];
+  document.querySelector("#timestamp").innerHTML = email["timestamp"];
+  document.querySelector("#email-body").innerHTML = email["body"];
+  archiveButton = document.querySelector("#archive");
+  if (email["archived"]) {
+    make_button_unarchive(archiveButton);
+  } else {
+    make_button_archive(archiveButton);
+  }
+  archiveButton.onclick = function(){
+    toggle_email_archived(email["id"]);
+  };
+
   fetch("emails/"+email["id"], {
     method: "PUT",
     body: JSON.stringify({
       read: true
     })
-  }).then(response => console.log(response));//response.text()).then(obj => console.log(obj));
+  });
 }
 
 function create_row(email, mailbox) {
   // console.log(email)
-  let containerDiv = document.createElement("div");
+  const containerDiv = document.createElement("div");
   let bgColorClass = ""
   if (email["read"]) {
     bgColorClass = "bg-light";
@@ -74,10 +135,10 @@ function create_row(email, mailbox) {
     bgColorClass = "bg-white";
   }
   containerDiv.className = "container my-1 border border-info " + bgColorClass;
-  let rowDiv = document.createElement("div");
+  const rowDiv = document.createElement("div");
   rowDiv.className = "row py-3";
   containerDiv.append(rowDiv);
-  let nameDiv = document.createElement("div");
+  const nameDiv = document.createElement("div");
   nameDiv.className = "col col-3 font-weight-bold";
   // nameDiv.className = "col w-25 font-weight-bold";
   let nameText = ""
@@ -89,12 +150,12 @@ function create_row(email, mailbox) {
   nameDiv.innerHTML = nameText;
   rowDiv.append(nameDiv);
 
-  let subjectDiv = document.createElement("div");
+  const subjectDiv = document.createElement("div");
   subjectDiv.className = "col col-6 ";
   subjectDiv.innerHTML = email["subject"];
   rowDiv.append(subjectDiv);
 
-  let dateDiv = document.createElement("div");
+  const dateDiv = document.createElement("div");
   dateDiv.className = "col col-3 text-right";
   // dateDiv.innerHTML = email["timestamp"];
   dateDiv.innerHTML = `<small class="text-muted"> ${email["timestamp"]} </small>`;

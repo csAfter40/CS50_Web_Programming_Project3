@@ -117,6 +117,7 @@ def email(request, email_id):
             email.read = data["read"]
         if data.get("archived") is not None:
             email.archived = data["archived"]
+            print(email.archived)
         email.save()
         return HttpResponse(status=204)
 
