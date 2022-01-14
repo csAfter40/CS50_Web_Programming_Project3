@@ -71,6 +71,12 @@ def compose(request):
 
     return JsonResponse({"message": "Email sent successfully."}, status=201)
 
+@login_required
+def unread_count(request):
+    emails = Email.objects.filter(
+        user = request.user, read=False
+    )
+    return JsonResponse({"count": len(emails)}, status=201)
 
 @login_required
 def mailbox(request, mailbox):
